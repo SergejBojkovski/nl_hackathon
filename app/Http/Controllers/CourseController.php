@@ -14,7 +14,7 @@ class CourseController extends Controller
     public function index()
     {
         $courses = Course::with(['category', 'professors'])->get();
-        return response()->json($courses);
+        return view('courses.index', compact('courses'));
     }
 
     /**
@@ -28,8 +28,8 @@ class CourseController extends Controller
             'category_id' => 'required|exists:categories,id',
         ]);
 
-        $course = Course::create($validated);
-        return response()->json($course, 201);
+        Course::create($validated);
+        return redirect()->route('courses.index')->with('success', 'Course created successfully.');
     }
 
     /**
@@ -38,7 +38,7 @@ class CourseController extends Controller
     public function show($id)
     {
         $course = Course::with(['category', 'professors'])->findOrFail($id);
-        return response()->json($course);
+        return view('courses.show', compact('course'));
     }
 
     /**
@@ -55,8 +55,8 @@ class CourseController extends Controller
 
         // Attach professor with role 'professor'
         $course->professors()->attach($professor->id, ['role' => 'professor']);
-
-        return response()->json(['message' => 'Professor assigned successfully']);
+        
+        #ako treba ovde da se menja za stranata
+        return redirect()->route('courses.show', $courseId)->with('success', 'Professor assigned successfully.');
     }
 }
-

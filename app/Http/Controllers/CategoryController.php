@@ -13,7 +13,7 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::with('courses')->get();
-        return response()->json($categories);
+        return view('categories.index', compact('categories'));
     }
 
     /**
@@ -25,8 +25,8 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        $category = Category::create($validated);
-        return response()->json($category, 201);
+        Category::create($validated);
+        return redirect()->route('categories.index')->with('success', 'Category created successfully.');
     }
 
     /**
@@ -35,6 +35,7 @@ class CategoryController extends Controller
     public function show($id)
     {
         $category = Category::with('courses')->findOrFail($id);
-        return response()->json($category);
+        #ako trbe da se smeni view ovde se menja za koja strana treba da ide
+        return view('categories.show', compact('category'));
     }
 }
