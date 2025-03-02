@@ -10,7 +10,12 @@ class Module extends Model
 {
     protected $fillable = ["name", "order"];
 
-    public function courses(): HasMany
+    public function course(): BelongsTo
+    {
+        return $this->belongsTo(Course::class);
+    }
+
+    public function lessons(): HasMany
     {
         return $this->hasMany(Lesson::class);
     }

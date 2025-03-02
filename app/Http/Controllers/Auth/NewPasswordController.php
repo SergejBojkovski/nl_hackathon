@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -28,7 +31,7 @@ class NewPasswordController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $request->validate([
             'token' => ['required'],
@@ -48,8 +51,33 @@ class NewPasswordController extends Controller
                 ])->save();
 
                 event(new PasswordReset($user));
+                
+                if ($request->wantsJson()) {
+                    // For API requests, we'll manually log the user in
+                    Auth::login($user);
+                }
             }
         );
+
+        if ($request->wantsJson()) {
+            if ($status == Password::PASSWORD_RESET) {
+                $user = Auth::user();
+                
+                return response()->json([
+                    'status' => 'success',
+                    'message' => __($status),
+                    'data' => [
+                        'user' => new UserResource($user),
+                        'token_type' => 'Bearer',
+                    ]
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => __($status)
+                ], 400);
+            }
+        }
 
         // If the password was successfully reset, we will redirect the user back to
         // the application's home authenticated view. If there is an error we can

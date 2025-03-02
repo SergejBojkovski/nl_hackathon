@@ -26,4 +26,9 @@ class Course extends Model
     {
         return $this->belongsToMany(User::class, "course_proffesor")->wherePivot('role', 'professor');
     }
+
+    public function modules(): HasMany
+    {
+        return $this->hasMany(Module::class);
+    }
 }
